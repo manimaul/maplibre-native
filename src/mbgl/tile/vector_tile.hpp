@@ -21,7 +21,7 @@ public:
     void setUpdateParameters(const TileUpdateParameters&) final;
     void setMetadata(std::optional<Timestamp> modified, std::optional<Timestamp> expires);
 
-    virtual void setData(const std::shared_ptr<const std::string>&) = 0;
+    virtual void setData(const std::shared_ptr<const std::string>&, bool available = true) = 0;
 
 protected:
     // this needs to be explicitly deleted in the most-derived destructor

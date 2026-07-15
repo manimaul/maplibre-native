@@ -19,7 +19,7 @@ public:
 
     ~VectorMVTTile() override;
 
-    void setData(const std::shared_ptr<const std::string>& data) override;
+    void setData(const std::shared_ptr<const std::string>& data, bool available = true) override;
 };
 
 } // namespace mbgl

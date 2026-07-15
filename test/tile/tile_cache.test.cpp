@@ -38,7 +38,7 @@ public:
         renderable = true;
     }
 
-    void setData(const std::shared_ptr<const std::string>&) override {}
+    void setData(const std::shared_ptr<const std::string>&, bool = true) override {}
 
     util::SimpleIdentity uniqueId;
 };

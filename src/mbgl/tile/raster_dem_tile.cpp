@@ -64,7 +64,7 @@ void RasterDEMTile::setMetadata(std::optional<Timestamp> modified_, std::optiona
     expires = std::move(expires_);
 }
 
-void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
+void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data, bool /*available*/) {
     if (!obsolete) {
         ++correlationID;
 

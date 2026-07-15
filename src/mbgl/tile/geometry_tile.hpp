@@ -35,10 +35,20 @@ public:
     ~GeometryTile() override;
 
     void setError(std::exception_ptr);
-    void setData(std::unique_ptr<const GeometryTileData>);
+    // `available` is false when the underlying tile resource is genuinely
+    // missing (a sparse-tileset gap) as opposed to present-but-empty; it only
+    // affects renderability when oversampling of missing tiles is enabled
+    // (see `setOversampleMissingTiles`).
+    void setData(std::unique_ptr<const GeometryTileData>, bool available = true);
     // Resets the tile's data and layers and leaves the tile in pending state,
     // waiting for the new data and layers to come.
     void reset();
+
+    // Controls whether a missing (not merely empty) tile resource should be
+    // treated as unavailable/non-renderable so that the renderer can
+    // substitute a coarser ancestor tile instead. Defaults to false, which
+    // preserves the historical behavior of always rendering a blank tile.
+    void setOversampleMissingTiles(bool enabled) { oversampleMissingTiles = enabled; }
 
     std::unique_ptr<TileRenderData> createRenderData() override;
     void setLayers(const std::vector<Immutable<style::LayerProperties>>&) override;
@@ -128,6 +138,8 @@ private:
     const MapMode mode;
 
     bool showCollisionBoxes;
+    bool dataAvailable = true;
+    bool oversampleMissingTiles = false;
 
     enum class FadeState {
         Loaded,

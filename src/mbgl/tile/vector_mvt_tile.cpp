@@ -24,9 +24,9 @@ VectorMVTTile::~VectorMVTTile() {
     GeometryTile::cancel();
 }
 
-void VectorMVTTile::setData(const std::shared_ptr<const std::string>& data_) {
+void VectorMVTTile::setData(const std::shared_ptr<const std::string>& data_, bool available) {
     if (!obsolete) {
-        GeometryTile::setData(data_ ? std::make_unique<VectorMVTTileData>(data_) : nullptr);
+        GeometryTile::setData(data_ ? std::make_unique<VectorMVTTileData>(data_) : nullptr, available);
     }
 }
 

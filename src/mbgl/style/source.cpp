@@ -40,6 +40,18 @@ void Source::setVolatile(bool set) noexcept {
     observer->onSourceChanged(*this);
 }
 
+bool Source::getOversampleMissingTiles() const noexcept {
+    return baseImpl->getOversampleMissingTiles();
+}
+
+void Source::setOversampleMissingTiles(bool set) noexcept {
+    if (getOversampleMissingTiles() == set) return;
+    auto newImpl = createMutable();
+    newImpl->setOversampleMissingTiles(set);
+    baseImpl = std::move(newImpl);
+    observer->onSourceChanged(*this);
+}
+
 void Source::setObserver(SourceObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver;
 }

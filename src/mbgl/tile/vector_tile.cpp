@@ -23,6 +23,7 @@ void VectorTile::setNecessity(TileNecessity necessity) {
 
 void VectorTile::setUpdateParameters(const TileUpdateParameters& params) {
     loader->setUpdateParameters(params);
+    setOversampleMissingTiles(params.oversampleMissingTiles);
 }
 
 void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<Timestamp> expires_) {

@@ -891,6 +891,65 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
               log);
 }
 
+// When an ideal tile is oversampled several zoom levels past the source's
+// maxzoom (e.g. a sparse tile set with a gap at maxzoom, viewed several zoom
+// levels beyond it), `scaledTo(z)` returns the *same* canonical tile for
+// every z in [canonical.z, overscaledZ). The ascent loop should check that
+// canonical tile only once instead of once per intermediate overscaledZ
+// value, whether the check finds a real tile there or has to continue
+// ascending to a genuinely coarser ancestor.
+TEST(UpdateRenderables, AscendSkipsRedundantOverscaleLevels) {
+    ActionLog log;
+    MockSource source;
+    auto getTileData = getTileDataFn(log, source.dataTiles);
+    auto createTileData = createTileDataFn(log, source.dataTiles);
+    auto retainTileData = retainTileDataFn(log);
+    auto renderTile = renderTileFn(log);
+
+    source.zoomRange.max = 2;
+    // Oversampled 4 zoom levels past canonical.z (and past zoomRange.max).
+    source.idealTiles.emplace(OverscaledTileID{6, 0, {2, 0, 0}});
+
+    // A real, non-overscaled tile exists at canonical.z itself.
+    auto tile_2_2_0_0 = source.createTileData(OverscaledTileID{2, 0, {2, 0, 0}});
+    tile_2_2_0_0->renderable = true;
+
+    algorithm::updateRenderables(
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
+    EXPECT_EQ(ActionLog({
+                  GetTileDataAction{{6, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
+                  CreateTileDataAction{{6, 0, {2, 0, 0}}},                          //
+                  RetainTileDataAction{{6, 0, {2, 0, 0}}, TileNecessity::Required}, //
+                  GetTileDataAction{{7, 0, {2, 0, 0}}, NotFound},                   // overzoomed child lookup
+                  // Ascent starts directly at canonical.z (2), skipping overscaledZ 5, 4, 3.
+                  GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      //
+                  RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Optional}, //
+                  RenderTileAction{{2, 0, 0}, *tile_2_2_0_0},                       //
+              }),
+              log);
+
+    // Now remove that tile so the ascent must continue past canonical.z to a
+    // genuinely coarser ancestor.
+    log.clear();
+    source.dataTiles.erase(OverscaledTileID{2, 0, {2, 0, 0}});
+    tile_2_2_0_0 = nullptr;
+    auto tile_1_1_0_0 = source.createTileData(OverscaledTileID{1, 0, {1, 0, 0}});
+    tile_1_1_0_0->renderable = true;
+
+    algorithm::updateRenderables(
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
+    EXPECT_EQ(ActionLog({
+                  GetTileDataAction{{6, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
+                  RetainTileDataAction{{6, 0, {2, 0, 0}}, TileNecessity::Required}, //
+                  GetTileDataAction{{7, 0, {2, 0, 0}}, NotFound},                   // overzoomed child lookup
+                  GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // canonical.z, checked once
+                  GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // genuine coarser ancestor
+                  RetainTileDataAction{{1, 0, {1, 0, 0}}, TileNecessity::Optional}, //
+                  RenderTileAction{{1, 0, 0}, *tile_1_1_0_0},                       //
+              }),
+              log);
+}
+
 TEST(UpdateRenderables, DoNotAscendMultipleTimesIfNotFound) {
     ActionLog log;
     MockSource source;

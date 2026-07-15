@@ -246,12 +246,14 @@ void GeometryTile::setError(std::exception_ptr err) {
     observer->onTileError(*this, std::move(err));
 }
 
-void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
+void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_, bool available) {
     MLN_TRACE_FUNC();
 
     if (obsolete) {
         return;
     }
+
+    dataAvailable = available;
 
     if (!pending) {
         observer->onTileAction(id, sourceID, TileOperation::StartParse);
@@ -338,7 +340,11 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64
     MLN_TRACE_FUNC();
 
     loaded = true;
-    renderable = true;
+    // A missing (not merely empty) tile only becomes non-renderable when the
+    // source has opted into oversampling of missing tiles; this lets the
+    // renderer substitute a coarser, real ancestor tile in its place. When
+    // the option is disabled, behavior is unchanged: always renderable.
+    renderable = dataAvailable || !oversampleMissingTiles;
     if (resultCorrelationID == correlationID) {
         pending = false;
         observer->onTileAction(id, sourceID, TileOperation::EndParse);

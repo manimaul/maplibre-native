@@ -136,6 +136,29 @@ public abstract class Source {
   }
 
   /**
+   * Retrieve whether missing tiles past this source's maxzoom (or gaps in a sparse tile set) are
+   * oversampled by substituting a coarser, already-available ancestor tile instead of leaving a
+   * blank tile. Useful for sparse offline tile sets (e.g. {@code mbtiles://} or {@code file://}).
+   *
+   * @return true if missing tiles are oversampled from an ancestor tile. Default value is false.
+   */
+  @NonNull
+  public Boolean isOversampleMissingTiles() {
+    return nativeGetOversampleMissingTiles();
+  }
+
+  /**
+   * Set a flag defining whether missing tiles past this source's maxzoom (or gaps in a sparse
+   * tile set) should be oversampled by substituting a coarser, already-available ancestor tile
+   * instead of leaving a blank tile.
+   *
+   * @param value current setting for oversampling missing tiles.
+   */
+  public void setOversampleMissingTiles(Boolean value) {
+    nativeSetOversampleMissingTiles(value);
+  }
+
+  /**
    * Sets the minimum tile update interval, which is used to throttle the tile update network requests.
    *
    * @param interval the update interval in milliseconds.
@@ -191,6 +214,13 @@ public abstract class Source {
 
   @Keep
   protected native void nativeSetVolatile(@NonNull Boolean value);
+
+  @NonNull
+  @Keep
+  protected native Boolean nativeGetOversampleMissingTiles();
+
+  @Keep
+  protected native void nativeSetOversampleMissingTiles(@NonNull Boolean value);
 
   @Keep
   protected native void nativeSetMinimumTileUpdateInterval(@NonNull Long interval);

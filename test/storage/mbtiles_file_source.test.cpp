@@ -105,7 +105,10 @@ TEST(MBTilesFileSource, Tile) {
     loop.run();
 }
 
-// Nonexistent tiles do not raise errors, they simply return no content
+// Nonexistent tiles (no row for the coordinate) return no content, and are
+// flagged with a NotFound error so callers can distinguish a sparse gap from
+// a tile that is present but legitimately empty. `TileLoader` treats
+// `NotFound` specially and does not surface it as a hard error.
 TEST(MBTilesFileSource, NonExistentTile) {
     util::RunLoop loop;
 
@@ -116,7 +119,8 @@ TEST(MBTilesFileSource, NonExistentTile) {
             toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
-            EXPECT_EQ(nullptr, res.error);
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
             ASSERT_FALSE(res.data.get());
             ASSERT_EQ(res.noContent, true);
             loop.stop();

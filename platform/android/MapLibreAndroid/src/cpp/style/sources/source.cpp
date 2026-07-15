@@ -199,6 +199,14 @@ void Source::setVolatile(JNIEnv& env, jni::Boolean& value) {
     source.setVolatile(jni::Unbox(env, value));
 }
 
+jni::Local<jni::Boolean> Source::getOversampleMissingTiles(jni::JNIEnv& env) {
+    return jni::Box(env, jni::jboolean(source.getOversampleMissingTiles()));
+}
+
+void Source::setOversampleMissingTiles(JNIEnv& env, jni::Boolean& value) {
+    source.setOversampleMissingTiles(jni::Unbox(env, value));
+}
+
 void Source::setMinimumTileUpdateInterval(JNIEnv& env, jni::Long& interval) {
     source.setMinimumTileUpdateInterval(Milliseconds(jni::Unbox(env, interval)));
 }
@@ -306,6 +314,8 @@ void Source::registerNative(jni::JNIEnv& env) {
         METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
         METHOD(&Source::isVolatile, "nativeIsVolatile"),
         METHOD(&Source::setVolatile, "nativeSetVolatile"),
+        METHOD(&Source::getOversampleMissingTiles, "nativeGetOversampleMissingTiles"),
+        METHOD(&Source::setOversampleMissingTiles, "nativeSetOversampleMissingTiles"),
         METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
         METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"),
         METHOD(&Source::setFeatureState, "nativeSetFeatureState"),

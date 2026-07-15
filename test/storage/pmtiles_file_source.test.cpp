@@ -85,7 +85,10 @@ TEST(PMTilesFileSource, Tile) {
     loop.run();
 }
 
-// Nonexistent tiles do not raise errors, they simply return no content
+// Nonexistent tiles (absent from the archive) return no content, and are
+// flagged with a NotFound error so callers can distinguish a sparse gap from
+// a tile that is present but legitimately empty. `TileLoader` treats
+// `NotFound` specially and does not surface it as a hard error.
 TEST(PMTilesFileSource, NonExistentTile) {
     util::RunLoop loop;
 
@@ -95,7 +98,8 @@ TEST(PMTilesFileSource, NonExistentTile) {
         Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
-            EXPECT_EQ(nullptr, res.error);
+            ASSERT_NE(nullptr, res.error);
+            EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
             ASSERT_FALSE(res.data.get());
             ASSERT_EQ(res.noContent, true);
             loop.stop();

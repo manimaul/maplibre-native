@@ -180,7 +180,11 @@ void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod meth
         resource.priorExpires = res.expires;
         resource.priorEtag = res.etag;
         tile.setMetadata(res.modified, res.expires);
-        tile.setData(res.noContent ? nullptr : res.data);
+        // Distinguish a genuinely missing tile (a sparse-tileset gap) from a
+        // tile that is present but legitimately empty, so tile types that
+        // support oversampling can decide whether to treat it as renderable.
+        const bool available = !(res.error && res.error->reason == Response::Error::Reason::NotFound);
+        tile.setData(res.noContent ? nullptr : res.data, available);
     }
 }
 

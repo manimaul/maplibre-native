@@ -53,7 +53,7 @@ void RasterTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
     expires = std::move(expires_);
 }
 
-void RasterTile::setData(const std::shared_ptr<const std::string>& data) {
+void RasterTile::setData(const std::shared_ptr<const std::string>& data, bool /*available*/) {
     if (!obsolete) {
         ++correlationID;
 

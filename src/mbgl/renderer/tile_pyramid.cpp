@@ -106,6 +106,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     const std::optional<uint8_t>& maxParentTileOverscaleFactor = sourceImpl.getMaxOverscaleFactorForParentTiles();
     const Duration minimumUpdateInterval = sourceImpl.getMinimumTileUpdateInterval();
     const bool isVolatile = sourceImpl.isVolatile();
+    const bool oversampleMissingTiles = sourceImpl.getOversampleMissingTiles();
 
     std::vector<OverscaledTileID> idealTiles;
     std::vector<OverscaledTileID> panTiles;
@@ -159,7 +160,9 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
     auto retainTileFn = [&](Tile& tile, TileNecessity necessity) -> void {
         if (retain.emplace(tile.id).second) {
-            tile.setUpdateParameters({.minimumUpdateInterval = minimumUpdateInterval, .isVolatile = isVolatile});
+            tile.setUpdateParameters({.minimumUpdateInterval = minimumUpdateInterval,
+                                      .isVolatile = isVolatile,
+                                      .oversampleMissingTiles = oversampleMissingTiles});
             tile.setNecessity(necessity);
         }
 

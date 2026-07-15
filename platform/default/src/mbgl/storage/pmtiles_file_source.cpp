@@ -136,8 +136,12 @@ public:
                     }
 
                     if (tileAddress.first == 0 && tileAddress.second == 0) {
+                        // The tile is genuinely absent from the archive (a sparse
+                        // gap), as opposed to present-but-empty. Report "not found"
+                        // so callers can distinguish the two cases.
                         Response response;
                         response.noContent = true;
+                        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
                         ref.invoke(&FileSourceRequest::setResponse, response);
                         return;
                     }

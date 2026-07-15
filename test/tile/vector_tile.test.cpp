@@ -43,6 +43,54 @@ TEST(VectorTile, onError) {
     EXPECT_TRUE(tile.isComplete());
 }
 
+TEST(VectorTile, MissingDataRendersBlankByDefault) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+
+    // `available = false` signals a genuinely missing (not merely empty)
+    // tile resource, e.g. a sparse-tileset gap.
+    tile.setData(nullptr, /*available=*/false);
+    while (!tile.isComplete()) {
+        test.loop.runOnce();
+    }
+
+    // Oversampling of missing tiles is disabled by default, so this preserves
+    // the historical behavior of always rendering a blank tile.
+    EXPECT_TRUE(tile.isRenderable());
+}
+
+TEST(VectorTile, MissingDataIsUnavailableWhenOversamplingEnabled) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+
+    tile.setUpdateParameters(
+        {.minimumUpdateInterval = Duration::zero(), .isVolatile = false, .oversampleMissingTiles = true});
+    tile.setData(nullptr, /*available=*/false);
+    while (!tile.isComplete()) {
+        test.loop.runOnce();
+    }
+
+    // With oversampling enabled, a missing tile becomes non-renderable so the
+    // renderer can substitute a real, coarser ancestor tile instead.
+    EXPECT_FALSE(tile.isRenderable());
+}
+
+TEST(VectorTile, EmptyDataStaysRenderableWhenOversamplingEnabled) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+
+    tile.setUpdateParameters(
+        {.minimumUpdateInterval = Duration::zero(), .isVolatile = false, .oversampleMissingTiles = true});
+    // `available` defaults to true: a tile that is present but legitimately
+    // empty must still render blank even when oversampling is enabled.
+    tile.setData(nullptr);
+    while (!tile.isComplete()) {
+        test.loop.runOnce();
+    }
+
+    EXPECT_TRUE(tile.isRenderable());
+}
+
 TEST(VectorTile, Issue8542) {
     VectorTileTest test;
     VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);

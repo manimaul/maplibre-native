@@ -80,6 +80,17 @@ public:
     bool isVolatile() const noexcept;
     void setVolatile(bool) noexcept;
 
+    // When enabled, a tile whose underlying resource is genuinely missing (a
+    // gap in a sparse tile set, e.g. an offline `mbtiles://`/`file://`
+    // package) is treated as unavailable rather than a valid blank tile, so
+    // the renderer can substitute a coarser, real ancestor tile in its place.
+    // This allows oversampling (zooming past the source's maxzoom) to work
+    // for sparse tile sets the same way undersampling (in-range gaps) already
+    // does. Defaults to false, which preserves the historical behavior of
+    // always rendering a blank tile for missing data.
+    bool getOversampleMissingTiles() const noexcept;
+    void setOversampleMissingTiles(bool) noexcept;
+
     // Private implementation
     /// @cond FALSE
 

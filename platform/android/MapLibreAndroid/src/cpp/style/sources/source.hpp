@@ -62,6 +62,10 @@ public:
 
     void setVolatile(JNIEnv&, jni::Boolean&);
 
+    jni::Local<jni::Boolean> getOversampleMissingTiles(JNIEnv&);
+
+    void setOversampleMissingTiles(JNIEnv&, jni::Boolean&);
+
     void setMinimumTileUpdateInterval(JNIEnv&, jni::Long&);
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);

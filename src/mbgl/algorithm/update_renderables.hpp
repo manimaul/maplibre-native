@@ -90,7 +90,25 @@ void updateRenderables(GetTileFn getTile,
 
             if (!covered) {
                 // We couldn't find child tiles that entirely cover the ideal tile.
-                for (overscaledZ = idealDataTileID.overscaledZ - 1; std::cmp_greater_equal(overscaledZ, zoomRange.min);
+                //
+                // For an overscaled ideal tile (overscaledZ > canonical.z), `scaledTo(z)`
+                // returns the *same* canonical tile for every z in [canonical.z,
+                // idealDataTileID.overscaledZ) -- it only produces a genuinely different,
+                // coarser ancestor once z < canonical.z (see OverscaledTileID::scaledTo).
+                // Stepping through that whole range one zoom level at a time would
+                // create/request several redundant Tile objects that all resolve to the
+                // identical underlying resource. Skip straight to canonical.z (checked
+                // once below) unless a configured maxParentOverscaleFactor would have
+                // capped the ascent at an intermediate step first.
+                int32_t startOverscaledZ = idealDataTileID.overscaledZ - 1;
+                if (std::cmp_greater_equal(startOverscaledZ, idealDataTileID.canonical.z) &&
+                    (!maxParentOverscaleFactor ||
+                     std::cmp_less_equal(idealDataTileID.overscaledZ - idealDataTileID.canonical.z,
+                                         *maxParentOverscaleFactor))) {
+                    startOverscaledZ = idealDataTileID.canonical.z;
+                }
+
+                for (overscaledZ = startOverscaledZ; std::cmp_greater_equal(overscaledZ, zoomRange.min);
                      --overscaledZ) {
                     const auto parentDataTileID = idealDataTileID.scaledTo(overscaledZ);
 

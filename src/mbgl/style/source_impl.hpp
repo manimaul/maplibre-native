@@ -28,6 +28,10 @@ public:
 
     bool isVolatile() const { return volatileFlag; }
     void setVolatile(bool set) { volatileFlag = set; }
+
+    bool getOversampleMissingTiles() const { return oversampleMissingTiles; }
+    void setOversampleMissingTiles(bool set) { oversampleMissingTiles = set; }
+
     const SourceType type;
     const std::string id;
 
@@ -38,6 +42,7 @@ protected:
     std::optional<uint8_t> maxOverscaleFactor;
     Duration minimumTileUpdateInterval{Duration::zero()};
     bool volatileFlag = false;
+    bool oversampleMissingTiles = false;
 
     Impl(SourceType, std::string);
     Impl(const Impl&) = default;

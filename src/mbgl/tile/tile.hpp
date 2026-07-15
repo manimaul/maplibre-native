@@ -38,10 +38,17 @@ class UploadPass;
 struct TileUpdateParameters {
     Duration minimumUpdateInterval;
     bool isVolatile;
+    // When enabled, a vector tile whose underlying resource is genuinely
+    // missing (as opposed to present-but-empty) is treated as unavailable
+    // rather than a valid blank tile, allowing the renderer to fall back to
+    // rendering a real, coarser ancestor tile in its place (oversampling a
+    // sparse tile set past its maxzoom).
+    bool oversampleMissingTiles = false;
 };
 
 inline bool operator==(const TileUpdateParameters& a, const TileUpdateParameters& b) {
-    return a.minimumUpdateInterval == b.minimumUpdateInterval && a.isVolatile == b.isVolatile;
+    return a.minimumUpdateInterval == b.minimumUpdateInterval && a.isVolatile == b.isVolatile &&
+           a.oversampleMissingTiles == b.oversampleMissingTiles;
 }
 
 inline bool operator!=(const TileUpdateParameters& a, const TileUpdateParameters& b) {

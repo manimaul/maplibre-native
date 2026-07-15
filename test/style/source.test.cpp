@@ -1062,3 +1062,25 @@ TEST(Source, SetMaxParentOverscaleFactor) {
             {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+
+TEST(Source, SetOversampleMissingTiles) {
+    SourceTest test;
+
+    VectorSource source("source", Tileset{{"url"}});
+    EXPECT_FALSE(source.getOversampleMissingTiles());
+
+    bool sourceChanged = false;
+    test.styleObserver.sourceChanged = [&](Source&) { sourceChanged = true; };
+    source.setObserver(&test.styleObserver);
+
+    source.setOversampleMissingTiles(true);
+    EXPECT_TRUE(source.getOversampleMissingTiles());
+    EXPECT_TRUE(sourceChanged);
+
+    sourceChanged = false;
+    source.setOversampleMissingTiles(true);
+    EXPECT_FALSE(sourceChanged); // no-op set should not notify observers
+
+    source.setOversampleMissingTiles(false);
+    EXPECT_FALSE(source.getOversampleMissingTiles());
+}

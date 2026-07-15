@@ -206,7 +206,9 @@ public:
         Response response;
         response.noContent = true;
 
+        bool rowFound = false;
         for (mapbox::sqlite::Query q(stmt); q.run();) {
+            rowFound = true;
             std::optional<std::string> data = q.get<std::optional<std::string>>(0);
             if (data) {
                 response.data = std::make_shared<std::string>(*data);
@@ -218,6 +220,14 @@ public:
                     response.data = std::make_shared<std::string>(util::decompress(*response.data));
                 }
             }
+        }
+
+        if (!rowFound) {
+            // No row for this tile coordinate at all, as opposed to a row with
+            // empty/null tile_data (a legitimately empty tile). Report this as
+            // "not found" so callers can distinguish a sparse gap from a valid
+            // empty tile.
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
         }
         req.invoke(&FileSourceRequest::setResponse, response);
     }

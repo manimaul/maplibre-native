@@ -71,7 +71,9 @@ public:
 
     void setError(std::exception_ptr);
     void setMetadata(std::optional<Timestamp> modified, std::optional<Timestamp> expires);
-    void setData(const std::shared_ptr<const std::string>& data);
+    // `available` is unused: a missing raster tile is already correctly
+    // treated as non-renderable via the parsed bucket's presence.
+    void setData(const std::shared_ptr<const std::string>& data, bool available = true);
 
     bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) override;
 
