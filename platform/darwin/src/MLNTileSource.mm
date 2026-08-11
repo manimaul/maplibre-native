@@ -3,6 +3,7 @@
 #import "MLNAttributionInfo_Private.h"
 #import "MLNGeometry_Private.h"
 #import "MLNRasterDEMSource.h"
+#import "MLNSource_Private.h"
 #import "MLNVectorTileSource.h"
 #import "NSString+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
@@ -13,6 +14,7 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
+#include <mbgl/style/source.hpp>
 #include <mbgl/util/tileset.hpp>
 
 const MLNTileSourceOption MLNTileSourceOptionMinimumZoomLevel =
@@ -49,6 +51,16 @@ const MLNTileSourceOption MLNTileSourceOptionTileCoordinateSystem =
 - (NSString *)attributionHTMLString {
   [NSException raise:MLNAbstractClassException format:@"MLNTileSource is an abstract class"];
   return nil;
+}
+
+- (BOOL)oversampleMissingTiles {
+  MLNAssertStyleSourceIsValid();
+  return self.rawSource->getOversampleMissingTiles();
+}
+
+- (void)setOversampleMissingTiles:(BOOL)oversampleMissingTiles {
+  MLNAssertStyleSourceIsValid();
+  self.rawSource->setOversampleMissingTiles(oversampleMissingTiles);
 }
 
 @end

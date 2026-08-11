@@ -194,6 +194,22 @@ MLN_EXPORT
  */
 @property (nonatomic, copy, nullable, readonly) NSString *attributionHTMLString;
 
+// MARK: Configuring Tile Availability
+
+/**
+ Whether a tile whose underlying resource is genuinely missing — a gap in a sparse
+ tile set, such as an offline `mbtiles://` or `file://` package — is treated as
+ unavailable rather than as a valid blank tile, so that a coarser, already-available
+ ancestor tile is substituted in its place.
+
+ Enabling this allows oversampling (zooming past the source’s maximum zoom level) to
+ work for sparse tile sets the same way undersampling already does for gaps within
+ the source’s zoom range.
+
+ The default value is `NO`, which renders a blank tile wherever data is missing.
+ */
+@property (nonatomic, assign) BOOL oversampleMissingTiles;
+
 @end
 
 NS_ASSUME_NONNULL_END

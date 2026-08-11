@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Add `MLNTileSource.oversampleMissingTiles`, which substitutes a coarser ancestor tile for tiles that are genuinely missing from a sparse tile set (such as an offline `mbtiles://` package) instead of rendering a blank tile.
 - Convert a PMTiles metadata decompression failure into an error response instead of an uncaught exception ([#4399](https://github.com/maplibre/maplibre-native/pull/4399)).
 
 ## 6.27.0
